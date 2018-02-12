@@ -1,22 +1,22 @@
-from jsonpath_rw import (parse, Child, Fields, JSONPath, Slice)
+import jsonpath_rw
 
 
 def _generate_jsonb_query(expr, query_tuple=None):
     query_tuple = tuple() if query_tuple is None else query_tuple
 
     print(f"{expr} [{expr.__class__.__name__}]")
-    if isinstance(expr, Child):
-        if isinstance(expr.right, Fields):
+    if isinstance(expr, jsonpath_rw.Child):
+        if isinstance(expr.right, jsonpath_rw.Fields):
             print((expr.right.fields[0],) + query_tuple)
             query_tuple = _generate_jsonb_query(expr.left, (expr.right.fields[0],) + query_tuple)
-        elif isinstance(expr.right, Slice):
+        elif isinstance(expr.right, jsonpath_rw.Slice):
             raise NotImplementedError("Filtering using slices is not supported.")
         else:
             raise NotImplementedError(
                 "Unrecognized child expression ("
                 f"left: {expr.left} [{expr.left.__class__.__name__}], "
                 f"right: {expr.right} [{expr.right.__class__.__name__}])")
-    elif isinstance(expr, Fields):
+    elif isinstance(expr, jsonpath_rw.Fields):
         print((expr.fields[0],) + query_tuple)
         query_tuple = (expr.fields[0],) + query_tuple
     else:
@@ -34,8 +34,8 @@ def _generate_jsonb_query_dict(index_tuple, value):
 
 def generate_jsonb_query(query, column, jsonpath, value=None):
     """
-    Generate a SQLAlchemy query for a JSONB column from a JSONPath string or
-    object.
+    Generate a SQLAlchemy query for a JSONB column from a jsonpath_rw.JSONPath
+    string or object.
 
     Only selecting via dictionary key is supported. Selecting or filtering using
     slices is not supported.
@@ -64,8 +64,8 @@ def generate_jsonb_query(query, column, jsonpath, value=None):
         A SQLAlchemy query object
     column : sqlalchemy.sql.schema.Column object
         The table column to filter on
-    jsonpath : str or JSONPath object
-        The JSONPath string to query with
+    jsonpath : str or jsonpath_rw.JSONPath object
+        The jsonpath_rw.JSONPath string to query with
     value : int or str, optional
         The value to match against using 'contains'. If not specified, the query
         is filtered using 'has_key'.
@@ -73,13 +73,13 @@ def generate_jsonb_query(query, column, jsonpath, value=None):
     Returns
     -------
     query
-        A SQLAlchemy query object that applies the given JSONPath filter to the
-        column
+        A SQLAlchemy query object that applies the given jsonpath_rw.JSONPath
+        filter to the column
     """
-    if isinstance(jsonpath, JSONPath):
+    if isinstance(jsonpath, jsonpath_rw.JSONPath):
         expr = jsonpath
     else:
-        expr = parse(jsonpath)
+        expr = jsonpath_rw.parse(jsonpath)
 
     path_tuple = _generate_jsonb_query(expr)
 
