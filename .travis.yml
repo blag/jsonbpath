@@ -1,0 +1,16 @@
+sudo: false
+
+language: python
+
+python:
+  - "3.6"
+
+install:
+  - pip install coverage coveralls jsonpath-rw mock
+
+script:
+  - coverage run --include=jsonbpath.py,tests.py tests.py
+
+after_script:
+  - coverage report
+  - coveralls
