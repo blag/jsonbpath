@@ -83,5 +83,5 @@ def generate_jsonb_query(query, column, jsonpath, value=None):
     if value is None:
         return query.filter(column.has_key(path_tuple))  # noqa: W601
     else:
-        path_value_dict = _generate_jsonb_query_dict(path_tuple)
+        path_value_dict = _generate_jsonb_query_dict(path_tuple, value)
         return query.filter(column.contains(path_value_dict))
