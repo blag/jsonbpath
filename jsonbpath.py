@@ -4,10 +4,8 @@ import jsonpath_rw
 def _generate_jsonb_query(expr, query_tuple=None):
     query_tuple = tuple() if query_tuple is None else query_tuple
 
-    print(f"{expr} [{expr.__class__.__name__}]")
     if isinstance(expr, jsonpath_rw.Child):
         if isinstance(expr.right, jsonpath_rw.Fields):
-            print((expr.right.fields[0],) + query_tuple)
             query_tuple = _generate_jsonb_query(expr.left, (expr.right.fields[0],) + query_tuple)
         elif isinstance(expr.right, jsonpath_rw.Slice):
             raise NotImplementedError("Filtering using slices is not supported.")
@@ -17,7 +15,6 @@ def _generate_jsonb_query(expr, query_tuple=None):
                 f"left: {expr.left} [{expr.left.__class__.__name__}], "
                 f"right: {expr.right} [{expr.right.__class__.__name__}])")
     elif isinstance(expr, jsonpath_rw.Fields):
-        print((expr.fields[0],) + query_tuple)
         query_tuple = (expr.fields[0],) + query_tuple
     else:
         raise NotImplementedError(f"Unrecognized expression: {expr}")
